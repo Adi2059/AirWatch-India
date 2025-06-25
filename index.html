@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AirWatch India</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+
+  <!-- 🌐 Navbar -->
+  <nav class="navbar">
+    <div class="logo">AirWatch India</div>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#team">Team VAYU 360</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- 🚀 Hero Section -->
+  <header class="hero">
+    <h1>India's Smartest Air Quality Monitor</h1>
+    <p>Real-time AQI analysis, visual dashboard, and ground-to-sky insights.</p>
+  </header>
+
+  <!-- 📊 Dashboard Section -->
+  <section id="dashboard" class="dashboard">
+    <h2>Live AQI Dashboard</h2>
+    <div class="cards">
+      <div class="card"><h3>Delhi</h3><p>AQI: 310</p></div>
+      <div class="card"><h3>Mumbai</h3><p>AQI: 97</p></div>
+      <div class="card"><h3>Lucknow</h3><p>AQI: 189</p></div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-container">
+      <canvas id="aqiChart"></canvas>
+    </div>
+
+    <!-- Map -->
+    <div id="map"></div>
+  </section>
+
+  <!-- 👥 Team Section -->
+  <section id="team" class="team">
+    <h2>Team VAYU 360</h2>
+    <p>Aditya Thakur | Mantush Kumar | Adhishtiy Kumar | Anivesh Rajput</p>
+  </section>
+
+  <!-- 📞 Contact -->
+  <footer id="contact">
+    <p>Made with ❤️ for ISRO Hackathon 2025</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,96 @@
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #0e0e1a;
+  color: white;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1b1b2f;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px #000;
+}
+.logo {
+  font-size: 1.5rem;
+  color: #00f7ff;
+  font-weight: bold;
+}
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+.nav-links li a:hover {
+  color: #00f7ff;
+}
+
+.hero {
+  padding: 3rem;
+  text-align: center;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+}
+.hero h1 {
+  font-size: 2.5rem;
+  color: #00f7ff;
+}
+.hero p {
+  margin-top: 1rem;
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+.dashboard {
+  padding: 2rem;
+  text-align: center;
+}
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+.card {
+  background: #1f1f2f;
+  border: 1px solid #00ffe0;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 12px #00ffe055;
+}
+
+.chart-container {
+  margin: 2rem auto;
+  width: 90%;
+  background: #1c1c2c;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+#map {
+  height: 400px;
+  width: 90%;
+  margin: auto;
+  border-radius: 10px;
+  margin-top: 2rem;
+}
+
+.team {
+  text-align: center;
+  background: #161625;
+  padding: 2rem;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  background: #111;
+  color: #777;
+}
