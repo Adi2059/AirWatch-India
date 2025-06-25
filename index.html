@@ -2,61 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AirWatch India</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AirWatch India | Official Dashboard</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    #india-map {
+      height: 500px;
+      width: 90%;
+      margin: 0 auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 1;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .page-section {
+      padding: 60px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .page-section h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .page-section p {
+      line-height: 1.7;
+      font-size: 1.05rem;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    input, textarea {
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button.submit-btn {
+      background-color: #002855;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 150px;
+    }
+  </style>
 </head>
 <body>
+  <div class="top-bar">
+    <div class="gov">भारत सरकार | GOVERNMENT OF INDIA</div>
+    <div class="ministry">MINISTRY OF ENVIRONMENT, FOREST AND CLIMATE CHANGE</div>
+  </div>
 
-  <!-- 🌐 Navbar -->
   <nav class="navbar">
-    <div class="logo">AirWatch India</div>
+    <div class="logo">🌐 AirWatch India</div>
     <ul class="nav-links">
-      <li><a href="#">Home</a></li>
-      <li><a href="#dashboard">Dashboard</a></li>
-      <li><a href="#team">Team VAYU 360</a></li>
+      <li><a href="#">Dashboard</a></li>
+      <li><a href="#">Cities</a></li>
+      <li><a href="#reports">Reports</a></li>
+      <li><a href="#policies">Policies</a></li>
       <li><a href="#contact">Contact</a></li>
+      <button id="darkToggle" class="login-btn">🌙</button>
+
     </ul>
+    <div class="nav-right">
+      <input type="text" placeholder="Search city...">
+      <button class="login-btn">Login</button>
+    </div>
+    <div id="loading-msg">Fetching Live AQI data...</div>
   </nav>
 
-  <!-- 🚀 Hero Section -->
   <header class="hero">
-    <h1>India's Smartest Air Quality Monitor</h1>
-    <p>Real-time AQI analysis, visual dashboard, and ground-to-sky insights.</p>
+    <div class="hero-content">
+      <h1>Track India's Air Quality in Real-Time</h1>
+      <p>Reliable AQI insights for healthier living</p>
+      <button class="cta">Explore Now</button>
+    </div>
   </header>
 
-  <!-- 📊 Dashboard Section -->
-  <section id="dashboard" class="dashboard">
-    <h2>Live AQI Dashboard</h2>
-    <div class="cards">
-      <div class="card"><h3>Delhi</h3><p>AQI: 310</p></div>
-      <div class="card"><h3>Mumbai</h3><p>AQI: 97</p></div>
-      <div class="card"><h3>Lucknow</h3><p>AQI: 189</p></div>
-    </div>
-
-    <!-- Chart -->
-    <div class="chart-container">
-      <canvas id="aqiChart"></canvas>
-    </div>
-
-    <!-- Map -->
-    <div id="map"></div>
+  <section id="map-section">
+    <h2 style="text-align:center; margin:20px 0;">Live AQI Map of India</h2>
+    <div id="india-map"></div>
   </section>
 
-  <!-- 👥 Team Section -->
-  <section id="team" class="team">
-    <h2>Team VAYU 360</h2>
-    <p>Aditya Thakur | Mantush Kumar | Adhishtiy Kumar | Anivesh Rajput</p>
+  <section class="stats">
+    <div class="stat-card">
+      <h3>179</h3>
+      <p>Total AQI Readings</p>
+    </div>
+    <div class="stat-card">
+      <h3>3</h3>
+      <p>Live Cities</p>
+    </div>
+    <div class="stat-card">
+      <h3>566</h3>
+      <p>Site Visits</p>
+    </div>
   </section>
 
-  <!-- 📞 Contact -->
-  <footer id="contact">
-    <p>Made with ❤️ for ISRO Hackathon 2025</p>
+  <section class="chart-section">
+    <canvas id="aqiChart" width="100%" height="50"></canvas>
+  </section>
+
+  <section class="highlight-feature">
+    <img src="/Images/modi.jpg" alt="Modi with ISRO Launch">
+    <div class="text">
+      <h2>Empowering India with Technology</h2>
+      <p>Driven by a vision of clean environment and technological leadership, AirWatch India reflects the spirit of Digital India and national innovation — backed by ISRO and our leadership.</p>
+    </div>
+  </section>
+
+  <section class="city-section"></section>
+
+  <section id="reports" class="page-section">
+    <h2>Reports</h2>
+    <p>Access real-time and historical air quality reports. We provide downloadable PDFs, graphs, and insights to help policymakers, researchers, and citizens stay informed.</p>
+    <ul>
+      <li><a href="#">📄 March 2025 AQI Report (PDF)</a></li>
+      <li><a href="#">📄 February 2025 AQI Report (PDF)</a></li>
+      <li><a href="#">📄 2024 Annual Air Quality Summary</a></li>
+    </ul>
+  </section>
+
+  <section id="policies" class="page-section">
+    <h2>Policies</h2>
+    <p>Learn about national and local air quality policies, environmental regulations, and initiatives under the Ministry of Environment. Stay up to date on new reforms and green action plans.</p>
+    <ul>
+      <li>✔️ National Clean Air Programme (NCAP)</li>
+      <li>✔️ Graded Response Action Plan (GRAP)</li>
+      <li>✔️ State-specific Air Quality Missions</li>
+    </ul>
+  </section>
+
+  <section id="contact" class="page-section">
+    <h2>Contact Us</h2>
+    <p>Have questions, suggestions, or data inquiries? Reach out to our team using the form below.</p>
+    <form>
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
+      <textarea rows="5" placeholder="Your Message"></textarea>
+      <button type="submit" class="submit-btn">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>Data Source: AirWatch India | © 2025</p>
   </footer>
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Login</h2>
+      <form>
+        <input type="email" placeholder="Email">
+        <input type="password" placeholder="Password">
+        <button class="submit-btn" type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+  
 
-  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Dark Mode Toggle
+    document.getElementById("darkToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+    });
+  
+    // Modal Logic
+    const modal = document.getElementById("loginModal");
+    const loginBtn = document.querySelector(".login-btn");
+    const closeBtn = document.querySelector(".close-btn");
+  
+    loginBtn.addEventListener("click", (e) => {
+      e.preventDefault(); // Prevent page refresh if inside <form>
+      modal.style.display = "flex";
+    });
+  
+    closeBtn.addEventListener("click", () => modal.style.display = "none");
+    window.addEventListener("click", e => {
+      if (e.target == modal) modal.style.display = "none";
+    });
+  </script>
+  
 </body>
 </html>
-
