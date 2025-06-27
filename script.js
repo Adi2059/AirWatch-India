@@ -108,32 +108,4 @@ function animateCounters() {
   });
 }
 
-function initMap(citiesWithAQI) {
-  setTimeout(() => {
-    const map = L.map('india-map').setView([22.9734, 78.6569], 5);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    citiesWithAQI.forEach(city => {
-      const aqi = city.aqi;
-      const color = aqi <= 100 ? 'green' : aqi <= 150 ? 'orange' : 'red';
-      const circle = L.circleMarker([city.lat, city.lon], {
-        radius: 8,
-        fillColor: color,
-        color: '#000',
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).addTo(map);
-      circle.bindPopup(`<strong>${city.name}</strong><br>AQI: ${aqi}`);
-    });
-  }, 100); // Wait a short delay to ensure DOM and layout are ready
-}
-document.addEventListener("DOMContentLoaded", () => {
-  animateCounters();
-  setupSearch();
-  fetchAQIData();
-});
 

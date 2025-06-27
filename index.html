@@ -1,200 +1,218 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- HEAD + FONT + THEME -->
+<head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AirWatch India | Official Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirWatch India</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #india-map {
-      height: 500px;
-      width: 90%;
-      margin: 0 auto;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 1;
+    body {
+      font-family: 'Poppins', sans-serif;
     }
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
+    .marquee {
+      white-space: nowrap;
+      overflow: hidden;
+      position: relative;
     }
-    .page-section {
-      padding: 60px 20px;
-      max-width: 1000px;
-      margin: auto;
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll-left 20s linear infinite;
     }
-    .page-section h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .page-section p {
-      line-height: 1.7;
-      font-size: 1.05rem;
-      color: #333;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin-top: 20px;
-    }
-    input, textarea {
-      padding: 10px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button.submit-btn {
-      background-color: #002855;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      width: 150px;
+    @keyframes scroll-left {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
     }
   </style>
 </head>
-<body>
-  <div class="top-bar">
-    <div class="gov">भारत सरकार | GOVERNMENT OF INDIA</div>
-    <div class="ministry">MINISTRY OF ENVIRONMENT, FOREST AND CLIMATE CHANGE</div>
-  </div>
 
-  <nav class="navbar">
-    <div class="logo">🌐 AirWatch India</div>
-    <ul class="nav-links">
-      <li><a href="#">Dashboard</a></li>
-      <li><a href="#">Cities</a></li>
-      <li><a href="#reports">Reports</a></li>
-      <li><a href="#policies">Policies</a></li>
-      <li><a href="#contact">Contact</a></li>
-      <button id="darkToggle" class="login-btn">🌙</button>
+<!-- SIDEBAR + MAIN LAYOUT -->
+<div class="flex flex-col md:flex-row min-h-screen">
+  <!-- Sidebar -->
+  <aside class="bg-blue-900 text-white w-full md:w-64 px-4 py-6">
+    <h2 class="text-xl font-bold mb-6">AirWatch India</h2>
+    <nav class="space-y-3 text-sm">
+      <a href="#" class="block hover:underline">Dashboard</a>
+      <a href="#map" class="block hover:underline">Live Map</a>
+      <a href="#reports" class="block hover:underline">Reports</a>
+      <a href="#policies" class="block hover:underline">Policies</a>
+      <a href="#contact" class="block hover:underline">Contact</a>
+      <a href="#about" class="block hover:underline">About</a>
+    </nav>
+  </aside>
 
-    </ul>
-    <div class="nav-right">
-      <input type="text" placeholder="Search city...">
-      <button class="login-btn">Login</button>
+  <!-- Main Content -->
+  <main class="flex-1">
+    <!-- CPCB-style Ticker + Dropdown -->
+    <div class="bg-yellow-400 text-black text-sm py-1 px-4 flex flex-wrap justify-between items-center gap-4">
+      <div class="whitespace-nowrap font-semibold">AIR QUALITY INDEX : Cities</div>
+      <div class="marquee flex-1 text-xs"><span id="liveTicker">🕔 Loading... &nbsp; :: Ahmedabad : 60 &nbsp; :: Bengaluru : 57 &nbsp; :: Chennai : 75 &nbsp; :: Delhi : 76 &nbsp; :: Hyderabad : 71 &nbsp; :: Jaipur : 47</span></div>
+      <div class="flex items-center gap-2">
+        <select onchange="filterMarkersDropdown(this.value)" class="px-2 py-1 text-xs rounded text-black">
+          <option value="">All Cities</option>
+          <option value="delhi">Delhi</option>
+          <option value="mumbai">Mumbai</option>
+          <option value="bengaluru">Bengaluru</option>
+          <option value="chennai">Chennai</option>
+          <option value="hyderabad">Hyderabad</option>
+        </select>
+        <button onclick="document.body.classList.toggle('dark')" class="bg-white text-black px-2 py-1 rounded text-xs">🌙</button>
+      </div>
     </div>
-    <div id="loading-msg">Fetching Live AQI data...</div>
-  </nav>
 
-  <header class="hero">
-    <div class="hero-content">
-      <h1>Track India's Air Quality in Real-Time</h1>
-      <p>Reliable AQI insights for healthier living</p>
-      <button class="cta">Explore Now</button>
+    <!-- Ministry Header -->
+    <div class="bg-blue-800 text-white text-center py-2">
+      <h1 class="text-sm font-semibold">भारत सरकार | GOVERNMENT OF INDIA</h1>
+      <h2 class="text-md font-semibold">MINISTRY OF ENVIRONMENT, FOREST AND CLIMATE CHANGE</h2>
     </div>
-  </header>
 
-  <section id="map-section">
-    <h2 style="text-align:center; margin:20px 0;">Live AQI Map of India</h2>
-    <div id="india-map"></div>
-  </section>
+    <!-- Hero -->
+    <section class="py-6 text-center">
+      <h2 class="text-2xl font-bold">Track India's Air Quality in Real-Time</h2>
+      <p class="text-gray-600">Trusted data for informed decisions</p>
+    </section>
 
-  <section class="stats">
-    <div class="stat-card">
-      <h3>179</h3>
-      <p>Total AQI Readings</p>
-    </div>
-    <div class="stat-card">
-      <h3>3</h3>
-      <p>Live Cities</p>
-    </div>
-    <div class="stat-card">
-      <h3>566</h3>
-      <p>Site Visits</p>
-    </div>
-  </section>
+    <!-- MAP + SIDE BLOCKS -->
+    <section id="map" class="px-4">
+      <div class="flex flex-col lg:flex-row gap-4 max-w-screen-xl mx-auto">
+        <div class="w-full lg:w-3/5">
+          <div id="india-map" class="w-full h-[600px] rounded shadow bg-gray-200"></div>
+        </div>
+        <div class="w-full lg:w-1/5">
+          <!-- Important Links -->
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="font-bold mb-2">Important Links</h3>
+            <ul class="list-disc ml-4 text-sm space-y-1">
+              <li><a href="#" class="hover:underline">📎 Pollution Control Acts, Rules and Notifications</a></li>
+              <li><a href="#" class="hover:underline">📎 PM2.5 & PM10 Monitoring</a></li>
+              <li><a href="#" class="hover:underline">📎 Daily AQI Bulletin</a></li>
+              <li><a href="#" class="hover:underline">📎 Delhi NCR AQI Report</a></li>
+              <li><a href="#" class="hover:underline">📎 District Environment Plan Templates</a></li>
+            </ul>
+            <button class="mt-2 text-blue-600 hover:underline">Read More</button>
+            <!-- New Add-on Content -->
+            <div class="mt-4 border-t pt-4 text-sm text-gray-700">
+              <h4 class="font-semibold mb-2">Did You Know?</h4>
+              <p>🌱 Planting trees can reduce urban AQI by up to 15% over time. Explore <a href="#" class="text-blue-600 hover:underline">urban greening policies</a>.</p>
+            </div>
+          </div>
+        </div>
+        <div class="w-full lg:w-1/5 space-y-4">
+          <!-- Ministers -->
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="font-bold mb-2">Ministers</h3>
+            <div class="space-y-4 text-sm">
+              <div><img src="/Images/modi.jpg" alt="PM Modi" class="rounded w-full"><strong>Sh. Narendra Modi</strong><br/><span>Hon'ble Prime Minister</span></div>
+              <div><img src="/Images/Yadav.jpg" alt="Minister Yadav" class="rounded w-full"><strong>Sh. Bhupender Yadav</strong><br/><span>Minister of EF&CC</span></div>
+              <div><img src="/Images/kirti.jpeg" alt="Minister Kirti" class="rounded w-full"><strong>Sh. Kirti Vardhan Singh</strong><br/><span>MoS, EF&CC</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <section class="chart-section">
-    <canvas id="aqiChart" width="100%" height="50"></canvas>
-  </section>
+    <!-- Graph below Map -->
+    <section class="py-6 px-4">
+      <div class="max-w-screen-xl mx-auto bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">Top 3 Polluted Cities (Sample)</h2>
+        <canvas id="topCitiesChart" height="200"></canvas>
+        <h2 class="text-lg font-semibold mt-8 mb-2">AQI Trend (Demo)</h2>
+        <canvas id="aqiTrendChart" height="200"></canvas>
+      </div>
+    </section>
+  </main>
+</div>
 
-  <section class="highlight-feature">
-    <img src="/Images/modi.jpg" alt="Modi with ISRO Launch">
-    <div class="text">
-      <h2>Empowering India with Technology</h2>
-      <p>Driven by a vision of clean environment and technological leadership, AirWatch India reflects the spirit of Digital India and national innovation — backed by ISRO and our leadership.</p>
-    </div>
-  </section>
+<script>
+  const map = L.map('india-map').setView([22.9734, 78.6569], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-  <section class="city-section"></section>
+  const markerRefs = [
+    { name: 'delhi', marker: L.marker([28.6139, 77.2090]).bindPopup('Delhi AQI: 76') },
+    { name: 'mumbai', marker: L.marker([19.0760, 72.8777]).bindPopup('Mumbai AQI: 92') },
+    { name: 'bengaluru', marker: L.marker([12.9716, 77.5946]).bindPopup('Bengaluru AQI: 63') },
+    { name: 'chennai', marker: L.marker([13.0827, 80.2707]).bindPopup('Chennai AQI: 71') },
+    { name: 'hyderabad', marker: L.marker([17.3850, 78.4867]).bindPopup('Hyderabad AQI: 67') }
+  ];
+  markerRefs.forEach(({ marker }) => marker.addTo(map));
 
-  <section id="reports" class="page-section">
-    <h2>Reports</h2>
-    <p>Access real-time and historical air quality reports. We provide downloadable PDFs, graphs, and insights to help policymakers, researchers, and citizens stay informed.</p>
-    <ul>
-      <li><a href="#">📄 March 2025 AQI Report (PDF)</a></li>
-      <li><a href="#">📄 February 2025 AQI Report (PDF)</a></li>
-      <li><a href="#">📄 2024 Annual Air Quality Summary</a></li>
-    </ul>
-  </section>
-
-  <section id="policies" class="page-section">
-    <h2>Policies</h2>
-    <p>Learn about national and local air quality policies, environmental regulations, and initiatives under the Ministry of Environment. Stay up to date on new reforms and green action plans.</p>
-    <ul>
-      <li>✔️ National Clean Air Programme (NCAP)</li>
-      <li>✔️ Graded Response Action Plan (GRAP)</li>
-      <li>✔️ State-specific Air Quality Missions</li>
-    </ul>
-  </section>
-
-  <section id="contact" class="page-section">
-    <h2>Contact Us</h2>
-    <p>Have questions, suggestions, or data inquiries? Reach out to our team using the form below.</p>
-    <form>
-      <input type="text" placeholder="Your Name" required>
-      <input type="email" placeholder="Your Email" required>
-      <textarea rows="5" placeholder="Your Message"></textarea>
-      <button type="submit" class="submit-btn">Send Message</button>
-    </form>
-  </section>
-
-  <footer>
-    <p>Data Source: AirWatch India | © 2025</p>
-  </footer>
-  <div id="loginModal" class="modal">
-    <div class="modal-content">
-      <span class="close-btn">&times;</span>
-      <h2>Login</h2>
-      <form>
-        <input type="email" placeholder="Email">
-        <input type="password" placeholder="Password">
-        <button class="submit-btn" type="submit">Login</button>
-      </form>
-    </div>
-  </div>
-  
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    // Dark Mode Toggle
-    document.getElementById("darkToggle").addEventListener("click", () => {
-      document.body.classList.toggle("dark");
+  function filterMarkersDropdown(selectedCity) {
+    markerRefs.forEach(({ name, marker }) => {
+      if (!selectedCity || name === selectedCity.toLowerCase()) {
+        marker.addTo(map);
+        if (selectedCity) {
+          map.setView(marker.getLatLng(), 8);
+          marker.openPopup();
+        }
+      } else {
+        map.removeLayer(marker);
+      }
     });
-  
-    // Modal Logic
-    const modal = document.getElementById("loginModal");
-    const loginBtn = document.querySelector(".login-btn");
-    const closeBtn = document.querySelector(".close-btn");
-  
-    loginBtn.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevent page refresh if inside <form>
-      modal.style.display = "flex";
-    });
-  
-    closeBtn.addEventListener("click", () => modal.style.display = "none");
-    window.addEventListener("click", e => {
-      if (e.target == modal) modal.style.display = "none";
-    });
-  </script>
-  
+  }
+
+  new Chart(document.getElementById('topCitiesChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Delhi', 'Mumbai', 'Chennai'],
+      datasets: [{
+        label: 'AQI',
+        data: [310, 280, 250],
+        backgroundColor: ['#dc2626', '#f59e0b', '#2563eb']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('aqiTrendChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [{
+        label: 'AQI Level',
+        data: [120, 135, 110, 150, 160, 145, 130],
+        backgroundColor: 'rgba(59,130,246,0.2)',
+        borderColor: 'rgba(59,130,246,1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' }
+      }
+    }
+  });
+
+  function updateTickerTime() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 || 12;
+    const timeStr = `${hour12}:${minutes} ${ampm}`;
+    document.getElementById('liveTicker').innerHTML = `🕔 ${timeStr} &nbsp; :: Ahmedabad : 60 &nbsp; :: Bengaluru : 57 &nbsp; :: Chennai : 75 &nbsp; :: Delhi : 76 &nbsp; :: Hyderabad : 71 &nbsp; :: Jaipur : 47`;
+  }
+  updateTickerTime();
+  setInterval(updateTickerTime, 60000);
+</script>
 </body>
 </html>
