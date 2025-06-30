@@ -55,27 +55,30 @@ function createAQIMarker(city) {
 }
 
 // 🔁 Render Live AQI
-async function renderLiveAQI() {
-  try {
-    const res = await fetch('http://127.0.0.1:5000/api/aqi');
-    const data = await res.json();
-    window.latestAqiData = data;
+// 👇 Render backend se AQI data fetch kar raha hai
+fetch("https://airwatch-india-backend.onrender.com/api/aqi")  // ✅ Replace with your backend URL
+  .then(res => res.json())
+  .then(data => {
+    console.log("AQI DATA:", data);  // ✅ Check Console mein output aa raha
 
-    data.forEach(city => createAQIMarker(city).addTo(map));
+    const container = document.getElementById("aqi-data");
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    const tickerContent = data.map(c => `:: ${c.city} : ${c.aqi}`).join(' &nbsp; ');
-    document.getElementById('liveTicker').innerHTML = `🕔 ${timeStr} &nbsp; ${tickerContent}`;
-  } catch (error) {
-    console.error("Failed to fetch AQI data:", error);
-  }
-}
+    // Sab data show kar do
+    container.innerHTML = data.map(city => `
+      <div class="city-box">
+        <h2>${city.city}</h2>
+        <p><strong>AQI:</strong> ${city.aqi}</p>
+      </div>
+    `).join("");
+  })
+  .catch(err => {
+    console.error("API Error:", err);
+  });
 
 // 📊 Charts
 async function updateAQICharts() {
   try {
-    const topRes = await fetch("http://127.0.0.1:5000/api/top-cities");
+    const topRes = await fetch("https://airwatch-india-backend.onrender.com/api/top-cities");
     const topData = await topRes.json();
 
     const topCtx = document.getElementById("topCitiesChart").getContext("2d");
@@ -99,7 +102,7 @@ async function updateAQICharts() {
       }
     });
 
-    const trendRes = await fetch("http://127.0.0.1:5000/api/aqi-trend");
+    const trendRes = await fetch("https://airwatch-india-backend.onrender.com/api/aqi-trend");
     const trendData = await trendRes.json();
     const trendCtx = document.getElementById("aqiTrendChart").getContext("2d");
     if (window.trendChart) window.trendChart.destroy();
