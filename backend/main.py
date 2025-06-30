@@ -5,6 +5,9 @@ import joblib
 import numpy as np
 
 app = Flask(__name__)
+@app.route('/')
+def home():
+    return "AirWatch India backend is Live!"
 CORS(app)
 
 WAQI_TOKEN = "9b92db00ba4e949dca3234f7ee25d4a45de37adb"
@@ -114,6 +117,7 @@ def ai_insights():
         "🚨 Patna and Kolkata show signs of sustained pollution. Long-term measures advised."
     ]
     return jsonify(insights)
+
 if __name__ == '__main__':
     from os import environ
     port = int(environ.get('PORT',5000))
