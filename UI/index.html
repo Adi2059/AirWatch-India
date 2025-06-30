@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirWatch India</title>
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- jsPDF and AutoTable for PDF generation -->
+  <script>
+  tailwind.config = {
+    darkMode: 'class'
+  }
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html {
+  scroll-behavior: smooth;
+}
+
+    button:hover {
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      html {
+  scroll-behavior: smooth;
+}
+.leaflet-marker-icon {
+  transition: transform 0.3s ease;
+}
+.leaflet-marker-icon:hover {
+  transform: scale(1.2);
+}
+
+    }
+    .marquee {
+      white-space: nowrap;
+      overflow: hidden;
+      position: relative;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll-left 20s linear infinite;
+    }
+    @keyframes scroll-left {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    #loading {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    #authPopup {
+  z-index: 9999 !important;
+}
+
+#india-map {
+  position: relative;
+  z-index: 0 !important;
+}
+
+  </style>
+</head>
+<!-- 🔝 Top Navigation Bar -->
+<header class="bg-white dark:bg-gray-900 shadow sticky top-0 z-50">
+  <div class="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
+    <h1 class="text-lg font-bold text-blue-800">AirWatch India</h1>
+    <nav class="space-x-4 text-sm">
+      <a href="#policies" class="text-gray-700 dark:text-white hover:underline">Policies</a>
+      <a href="#reports" class="text-gray-700 dark:text-white hover:underline">Reports</a>
+      <a href="#contact" class="text-gray-700 dark:text-white hover:underline">Contact</a>
+      <a href="#about" class="text-gray-700 dark:text-white hover:underline">About</a>
+    </nav>
+  </div>
+</header>
+
+
+ 
+
+  <main class="flex-1">
+
+    <div class="bg-yellow-400 text-black text-sm py-1 px-4 flex flex-wrap justify-between items-center gap-4">
+      <div class="whitespace-nowrap font-semibold">AIR QUALITY INDEX : Cities</div>
+      <div class="marquee flex-1 text-xs"><span id="liveTicker">🕔 Loading... &nbsp;</span></div>
+      <div class="flex items-center gap-2">
+        <select onchange="filterMarkersDropdown(this.value)" class="px-2 py-1 text-xs rounded text-black">
+          <option value="">All Cities</option>
+          <option value="delhi">Delhi</option>
+          <option value="mumbai">Mumbai</option>
+          <option value="bengaluru">Bengaluru</option>
+          <option value="chennai">Chennai</option>
+          <option value="hyderabad">Hyderabad</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="bg-blue-800 text-white text-center py-2">
+      <h1 class="text-sm font-semibold">भारत सरकार | GOVERNMENT OF INDIA</h1>
+      <h2 class="text-md font-semibold">AirWatch India | Citizen-Led AQI Awareness
+                                         An Initiative for a Cleaner & Greener India</h2>
+    </div>
+
+    <section class="py-6 text-center">
+      <h2 class="text-2xl font-bold">Track India's Air Quality in Real-Time</h2>
+      <p class="text-gray-600">Trusted data for informed decisions</p>
+    </section>
+
+    <div id="loading" class="text-white text-xl text-center mt-4">
+      🔄 Loading Air Quality Data...
+    </div>
+    <section id="map" class="px-4">
+      <div class="flex flex-col lg:flex-row gap-4 max-w-screen-xl mx-auto">
+        <div class="w-full lg:w-3/5">
+          <div id="india-map" class="w-full h-[600px] rounded shadow bg-gray-200"></div>
+        </div>
+        <div class="w-full lg:w-1/5">
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="font-bold mb-2">Important Links</h3>
+            <ul class="list-disc ml-4 text-sm space-y-1">
+              <li><a href="#" class="hover:underline">📎 Pollution Control Acts</a></li>
+              <li><a href="#" class="hover:underline">📎 PM2.5 & PM10 Monitoring</a></li>
+              <li><a href="#" class="hover:underline">📎 Daily AQI Bulletin</a></li>
+              <li><a href="#" class="hover:underline">📎 Delhi NCR AQI Report</a></li>
+              <li><a href="#" class="hover:underline">📎 Environment Plan Templates</a></li>
+            </ul>
+            <button class="mt-2 text-blue-600 hover:underline">Read More</button>
+
+            <div class="mt-6 p-4 bg-white rounded-xl shadow-md">
+  <h2 class="text-xl font-semibold mb-2">📡 Predict AQI using AI Model</h2>
+  <select id="citySelect" class="border p-2 rounded mb-2">
+    <option value="Delhi" data-lat="28.6139" data-lon="77.2090">Delhi</option>
+    <option value="Mumbai" data-lat="19.0760" data-lon="72.8777">Mumbai</option>
+    <option value="Bengaluru" data-lat="12.9716" data-lon="77.5946">Bengaluru</option>
+    <option value="Chennai" data-lat="13.0827" data-lon="80.2707">Chennai</option>
+    <option value="Hyderabad" data-lat="17.3850" data-lon="78.4867">Hyderabad</option>
+  </select>
+
+  <button onclick="predictSelectedCityAQI()" class="bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+    Predict AQI
+  </button>
+
+  <p id="predictionResult" class="mt-4 text-lg font-medium text-gray-700"></p>
+</div>
+
+
+            <div class="mt-4 border-t pt-4 text-sm text-gray-700">
+              <h4 class="font-semibold mb-2">Did You Know?</h4>
+              <p>🌱 Planting trees can reduce urban AQI by up to 15% over time.</p>
+            </div>
+          </div>
+        </div>
+        <div class="w-full lg:w-1/5 space-y-4">
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="font-bold mb-2">Ministers</h3>
+            <div class="space-y-4 text-sm">
+            </div><img src="Images/modi.jpg"alt="PM Modi" class="rounded w-full"><strong>Sh. Narendra Modi</strong><br/><span>Hon'ble Prime Minister</span></div>
+              <div><img src="Images/Yadav.jpg"alt="Minister Yadav" class="rounded w-full"><strong>Sh. Bhupender Yadav</strong><br/><span>Minister of EF&CC</span></div>
+              <div><img src="Images/kirti.jpeg"alt="Minister Kirti" class="rounded w-full"><strong>Sh. Kirti Vardhan Singh</strong><br/><span>MoS, EF&CC</span></div>
+           <div><p class="text-xs text-gray-500 mt-2">Photos shown for representation. This platform is independent and not affiliated with the government.</p></div>
+      </div>
+    </section>
+    
+<!-- 🔍 AI INSIGHTS BOX -->
+<section id="aiBox" class="px-4 py-6 transition-transform duration-700 translate-y-8 opacity-0">
+
+  <div class="max-w-screen-xl mx-auto bg-white dark:bg-gray-800 text-gray-800 dark:text-white p-4 rounded-xl shadow">
+    <h2 class="text-xl font-bold mb-2">🤖 AI Insights</h2>
+    <ul id="insightList" class="list-disc ml-6 space-y-2 text-sm">
+      <li>Loading insights...</li>
+    </ul>
+  </div>
+</section>
+<section class="py-6 px-4 max-w-screen-xl mx-auto">
+  <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-4">📂 Download Reports</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Export AQI data of cities to CSV or PDF format.</p>
+    <div class="flex gap-4">
+      <button onclick="downloadCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">⬇️ Download CSV</button>
+    </div>
+  </div>
+  
+</section>
+    <section class="py-6 px-4">
+      <div class="max-w-screen-xl mx-auto bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">Top 3 Polluted Cities (Sample)</h2>
+        <canvas id="topCitiesChart" height="200"></canvas>
+        <h2 class="text-lg font-semibold mt-8 mb-2">AQI Trend (Demo)</h2>
+        <canvas id="aqiTrendChart" height="200"></canvas>
+      </div>
+    </section>
+  </main>
+</section>
+ <section id="policies" class="px-4 py-6">
+  <div class="max-w-screen-xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+    <h2 class="text-2xl font-bold mb-4">📜 Environmental Policies</h2>
+    <ul class="list-disc space-y-2 ml-6 text-gray-700 dark:text-gray-300">
+      <li>National Clean Air Programme (NCAP)</li>
+      <li>Air (Prevention and Control of Pollution) Act, 1981</li>
+      <li>Vehicle Emission Norms and BS-VI Regulations</li>
+      <li>State Action Plans for Climate Change</li>
+    </ul>
+  </div>
+</section>
+<section id="reports" class="px-4 py-6">
+  <div class="max-w-screen-xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+    <h2 class="text-2xl font-bold mb-4">📊 Daily & Weekly AQI Reports</h2>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">
+      Download reports for research, governance, or public awareness.
+    </p>
+    <button onclick="downloadCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mr-4">⬇️ Download CSV</button>
+    
+  </div>
+</section>
+<section id="contact" class="px-4 py-6">
+  <div class="max-w-screen-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+    <h2 class="text-2xl font-bold mb-4">📞 Contact Us</h2>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">For suggestions, collaboration, or support:</p>
+    <form class="space-y-4">
+      <input type="text" placeholder="Your Name" class="w-full p-2 border rounded" />
+      <input type="email" placeholder="Your Email" class="w-full p-2 border rounded" />
+      <textarea rows="4" placeholder="Your Message" class="w-full p-2 border rounded"></textarea>
+      <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">📨 Send</button>
+    </form>
+  </div>
+</section>
+<section id="about" class="px-4 py-6">
+  <div class="max-w-screen-xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+    <h2 class="text-2xl font-bold mb-4">ℹ️ About AirWatch India</h2>
+    <p class="text-gray-700 dark:text-gray-300 text-sm">
+      AirWatch India is a real-time air quality monitoring platform built to support public awareness and government action.
+      Powered by AI, real-time data APIs, and satellite overlays, our mission is to ensure transparent, accurate, and accessible environmental data.
+    </p>
+  </div>
+</section>
+<!-- 🔐 Login Popup -->
+<div id="authPopup" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-80 shadow-md relative">
+    <button onclick="closeAuthPopup()" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 text-xl">&times;</button>
+    <h2 class="text-xl font-bold mb-4 text-center">Login / Sign Up</h2>
+    <input type="email" id="email" placeholder="Email" class="w-full mb-3 p-2 border rounded" />
+    <input type="password" id="password" placeholder="Password" class="w-full mb-3 p-2 border rounded" />
+    <button onclick="loginUser()" class="bg-blue-700 text-white w-full py-2 rounded mb-2">Login</button>
+    <button onclick="signupUser()" class="bg-green-700 text-white w-full py-2 rounded">Sign Up</button>
+  </div>
+</div>
+<footer class="text-xs text-gray-500 text-center mt-4 p-2">
+  ⚠️ Disclaimer: This is not an official Government of India website. The data is sourced for educational and awareness purposes only.
+</footer>
+
+<script>
+  async function loadInsights() {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/insights");
+      const insights = await res.json();
+      const list = document.getElementById("insightList");
+
+      list.innerHTML = ""; // clear 'Loading...' text
+      insights.forEach(insight => {
+        const li = document.createElement("li");
+        li.textContent = insight;
+        list.appendChild(li);
+      });
+    } catch (err) {
+      document.getElementById("insightList").innerHTML = "<li>❌ Failed to load insights.</li>";
+      console.error("Insights fetch error:", err);
+    }
+  }
+
+  // Load on page start
+  
+  window.addEventListener("load", () => {
+  loadInsights();
+  document.getElementById("aiBox").classList.remove("translate-y-8", "opacity-0");
+});
+
+</script>
+
+
+
+<script src="script.js"></script>
+
+
+
+<!-- 🔻 Custom Prediction Logic -->
+<script>
+async function predictSelectedCityAQI() {
+  const select = document.getElementById('citySelect');
+  const city = select.value;
+  const lat = parseFloat(select.selectedOptions[0].getAttribute('data-lat'));
+  const lon = parseFloat(select.selectedOptions[0].getAttribute('data-lon'));
+
+  try {
+    const res = await fetch('http://127.0.0.1:5000/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ city, lat, lon })
+    }); 
+
+    const data = await res.json();
+
+    document.getElementById('predictionResult').innerHTML =
+      `<strong>🤖 Predicted AQI for ${city}:</strong> ${data.predicted_aqi}<br>
+       🌡️ Temp: ${data.temp} °C, 💧 Humidity: ${data.humidity}%, ⚙️ Pressure: ${data.pressure} hPa`;
+  } catch (error) {
+    console.error('Prediction failed:', error);
+    document.getElementById('predictionResult').innerText = '❌ Prediction failed. Check backend/API.';
+  }
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  const { jsPDF } = window.jspdf;
+</script>
+
+
+</body>
+<script>
+  window.addEventListener("load", () => {
+    document.body.classList.remove("opacity-0");
+  });
+</script>
+
+</html>
