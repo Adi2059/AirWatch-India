@@ -170,9 +170,9 @@
           <div class="bg-white p-4 rounded shadow">
             <h3 class="font-bold mb-2">Ministers</h3>
             <div class="space-y-4 text-sm">
-            </div><img src="Images/modi.jpg"alt="PM Modi" class="rounded w-full"><strong>Sh. Narendra Modi</strong><br/><span>Hon'ble Prime Minister</span></div>
-              <div><img src="Images/Yadav.jpg"alt="Minister Yadav" class="rounded w-full"><strong>Sh. Bhupender Yadav</strong><br/><span>Minister of EF&CC</span></div>
-              <div><img src="Images/kirti.jpeg"alt="Minister Kirti" class="rounded w-full"><strong>Sh. Kirti Vardhan Singh</strong><br/><span>MoS, EF&CC</span></div>
+            </div><img src="/Images/modi.jpg"alt="PM Modi" class="rounded w-full"><strong>Sh. Narendra Modi</strong><br/><span>Hon'ble Prime Minister</span></div>
+              <div><img src="/Images/Yadav.jpg">alt="Minister Yadav" class="rounded w-full"><strong>Sh. Bhupender Yadav</strong><br/><span>Minister of EF&CC</span></div>
+              <div><img src="/Images/kirti.jpeg"alt="Minister Kirti" class="rounded w-full"><strong>Sh. Kirti Vardhan Singh</strong><br/><span>MoS, EF&CC</span></div>
            <div><p class="text-xs text-gray-500 mt-2">Photos shown for representation. This platform is independent and not affiliated with the government.</p></div>
       </div>
     </section>
@@ -267,7 +267,7 @@
 <script>
   async function loadInsights() {
     try {
-      const res = await fetch("https://airwatch-india-backend.onrender.com/api/insights");
+      const res = await fetch("http://127.0.0.1:5000/api/insights");
       const insights = await res.json();
       const list = document.getElementById("insightList");
 
@@ -307,11 +307,11 @@ async function predictSelectedCityAQI() {
   const lon = parseFloat(select.selectedOptions[0].getAttribute('data-lon'));
 
   try {
-    const res = await fetch('https://airwatch-india-backend.onrender.com/api/predict', {
+    const res = await fetch('http://127.0.0.1:5000/api/predict', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ city, lat, lon })
-    }); 
+    });
 
     const data = await res.json();
 

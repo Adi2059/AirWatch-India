@@ -3,8 +3,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
 import joblib
+import numpy as np
 
-# Original data
+# Original data + mock reanalysis features
 data = {
     'city': ['Delhi', 'Mumbai', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Pune',
              'Bhopal', 'Patna', 'Nagpur', 'Indore', 'Chandigarh'],
@@ -15,7 +16,9 @@ data = {
     'aqi': [159, 121, 71, 72, 72, 169, 49, 63, 53, 59, 38, 138, 52, 83, 87],
     'temp': [25]*15,
     'humidity': [50]*15,
-    'pressure': [1010]*15
+    'pressure': [1010]*15,
+    'wind_speed': np.random.uniform(1, 10, size=15),  # 🔁 Mock Wind Speed
+    'solar_radiation': np.random.uniform(100, 1000, size=15)  # 🔁 Mock Solar Radiation
 }
 
 df = pd.DataFrame(data)

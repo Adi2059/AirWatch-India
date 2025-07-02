@@ -11,6 +11,12 @@ const cloudOverlay = L.tileLayer('https://tile.openweathermap.org/map/clouds_new
   opacity: 0.5,
   attribution: '☁️ Clouds © OpenWeatherMap'
 });
+const modisAOD = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_Aerosol/default/{time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg', {
+  attribution: '🛰️ MODIS Terra via NASA GIBS',
+  tileSize: 256,
+  time: new Date().toISOString().split("T")[0], // today's date
+  opacity: 0.6
+});
 
 const map = L.map('india-map', {
   center: [22.9734, 78.6569],
@@ -24,9 +30,11 @@ L.control.layers(
     "🛰️ Satellite": satelliteMap
   },
   {
-    "☁️ Cloud Overlay": cloudOverlay
+    "☁️ Cloud Overlay": cloudOverlay,
+    "🛰️ MODIS AOD": modisAOD  // ← new line
   }
 ).addTo(map);
+
 
 // 🔵 AQI Markers
 function getColor(aqi) {
@@ -55,30 +63,27 @@ function createAQIMarker(city) {
 }
 
 // 🔁 Render Live AQI
-// 👇 Render backend se AQI data fetch kar raha hai
-fetch("https://airwatch-india-backend.onrender.com/api/aqi")  // ✅ Replace with your backend URL
-  .then(res => res.json())
-  .then(data => {
-    console.log("AQI DATA:", data);  // ✅ Check Console mein output aa raha
+async function renderLiveAQI() {
+  try {
+    const res = await fetch('http://127.0.0.1:5000/api/aqi');
+    const data = await res.json();
+    window.latestAqiData = data;
 
-    const container = document.getElementById("aqi-data");
+    data.forEach(city => createAQIMarker(city).addTo(map));
 
-    // Sab data show kar do
-    container.innerHTML = data.map(city => `
-      <div class="city-box">
-        <h2>${city.city}</h2>
-        <p><strong>AQI:</strong> ${city.aqi}</p>
-      </div>
-    `).join("");
-  })
-  .catch(err => {
-    console.error("API Error:", err);
-  });
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const tickerContent = data.map(c => `:: ${c.city} : ${c.aqi}`).join(' &nbsp; ');
+    document.getElementById('liveTicker').innerHTML = `🕔 ${timeStr} &nbsp; ${tickerContent}`;
+  } catch (error) {
+    console.error("Failed to fetch AQI data:", error);
+  }
+}
 
 // 📊 Charts
 async function updateAQICharts() {
   try {
-    const topRes = await fetch("https://airwatch-india-backend.onrender.com/api/top-cities");
+    const topRes = await fetch("http://127.0.0.1:5000/api/top-cities");
     const topData = await topRes.json();
 
     const topCtx = document.getElementById("topCitiesChart").getContext("2d");
@@ -102,7 +107,7 @@ async function updateAQICharts() {
       }
     });
 
-    const trendRes = await fetch("https://airwatch-india-backend.onrender.com/api/aqi-trend");
+    const trendRes = await fetch("http://127.0.0.1:5000/api/aqi-trend");
     const trendData = await trendRes.json();
     const trendCtx = document.getElementById("aqiTrendChart").getContext("2d");
     if (window.trendChart) window.trendChart.destroy();

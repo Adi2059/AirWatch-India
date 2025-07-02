@@ -5,9 +5,6 @@ import joblib
 import numpy as np
 
 app = Flask(__name__)
-@app.route('/')
-def home():
-    return "AirWatch India backend is Live!"
 CORS(app)
 
 WAQI_TOKEN = "9b92db00ba4e949dca3234f7ee25d4a45de37adb"
@@ -69,6 +66,8 @@ def aqi_trend():
 @app.route('/api/predict', methods=['POST'])
 def predict_aqi():
     data = request.json
+    print("📩 Received data:", data)
+
     city = data.get("city")
     lat = data.get("lat")
     lon = data.get("lon")
@@ -76,36 +75,51 @@ def predict_aqi():
     if not all([city, lat, lon]):
         return jsonify({"error": "city, lat, lon required"}), 400
 
-    # 🛰️ Fetch real-time weather data
     try:
+        print("🌐 Fetching weather for:", lat, lon)
         weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid=1a2576a4b84bfb2012c4297ed23dbdd9&units=metric"
+        print("🌐 API URL:", weather_url)
 
         res = requests.get(weather_url)
         weather = res.json()
+        print("🌦️ Weather JSON:", weather)
 
         temp = weather["main"]["temp"]
         humidity = weather["main"]["humidity"]
         pressure = weather["main"]["pressure"]
     except Exception as e:
+        print("❌ Weather fetch error:", str(e))
         return jsonify({"error": f"Weather fetch failed: {str(e)}"}), 500
 
-    # 🔎 City One-Hot Encoding
+    # 📦 Mock Reanalysis
+    wind_speed = 5.5
+    solar_radiation = 650
+
     cities_list = ['Ahmedabad', 'Bengaluru', 'Bhopal', 'Chandigarh', 'Chennai', 'Delhi',
                    'Hyderabad', 'Indore', 'Jaipur', 'Kolkata', 'Lucknow', 'Mumbai',
                    'Nagpur', 'Patna', 'Pune']
-    city_features = [1 if c == city else 0 for c in cities_list]
 
-    # 🤖 Prediction
-    features = [lat, lon, temp, humidity, pressure] + city_features
-    predicted_aqi = model.predict([features])[0]
+    city_features = [1 if c == city else 0 for c in cities_list]
+    features = [lat, lon, temp, humidity, pressure, wind_speed, solar_radiation] + city_features
+    print("🧠 Model input features:", features)
+
+    try:
+        predicted_aqi = model.predict([features])[0]
+    except Exception as e:
+        print("❌ Error in /api/predict:", str(e))
+        return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 
     return jsonify({
         "predicted_aqi": round(predicted_aqi),
         "city": city,
         "temp": temp,
         "humidity": humidity,
-        "pressure": pressure
+        "pressure": pressure,
+        "wind_speed": wind_speed,
+        "solar_radiation": solar_radiation
     })
+
+
 @app.route('/api/insights')
 def ai_insights():
     # You can dynamically generate or update this list from your ML model in the future
@@ -117,8 +131,5 @@ def ai_insights():
         "🚨 Patna and Kolkata show signs of sustained pollution. Long-term measures advised."
     ]
     return jsonify(insights)
-
 if __name__ == '__main__':
-    from os import environ
-    port = int(environ.get('PORT',5000))
-    app.run(debug=True, host='0.0.0.0',port=port)
+    app.run(debug=True)
